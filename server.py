@@ -24,76 +24,6 @@ def requested_data(data,type,torequest,recdata):
 
     return [recdata,torequest]
     
-def response(selected_option, user_input,filename):
-    try:
-        # Retrieve data once when the server starts
-        with open(filename, 'r') as ofile:
-            info = json.load(ofile)
-
-        selected_info = "."
-        for news in info:
-            # Process flight data based on the selected option
-            if selected_option == '1':
-                if news['flight_status'] == 'landed':
-                    selected_info += f"***Here are your required information about arrived flights ✅***\n"
-                    selected_info += f"\n"  
-                    selected_info += f"Flight IATA code: {news['flight']['iata']}\n"
-                    selected_info += f"Departure Airport: {news['departure']['airport']}\n"
-                    selected_info += f"Arrival Time: {news['arrival']['estimated']}\n"
-                    selected_info += f"Arrival Terminal: {news['arrival']['terminal']}\n"
-                    selected_info += f"Arrival Gate: {news['arrival']['gate']}\n"
-                    selected_info += "\n"
-                    selected_info += "=====================================\n"
-            elif selected_option == '2':
-                if news['arrival']['delay'] is not None:
-                    selected_info += f"***Here are your required information about delayed flights ⏱️***\n"
-                    selected_info += f"\n"
-                    selected_info += f"Flight IATA code: {news['flight']['iata']}\n"
-                    selected_info += f"Departure Airport: {news['departure']['airport']}\n"
-                    selected_info += f"Original departure Time: {news['departure']['actual']}\n"
-                    selected_info += f"Estimated Arrival Time: {news['arrival']['estimated']}\n"
-                    selected_info += f"Arrival terminal: {news['departure']['terminal']}\n"
-                    selected_info += f"delay : {news['arrival']['delay']}\n"
-                    selected_info += f"Arrival Gate: {news['arrival']['gate']}\n"
-                    selected_info += "\n"
-                    selected_info += "=====================================\n"
-            elif selected_option == '3':
-                if news['departure']['iata'] == user_input:
-                    selected_info += f"***Required information about specific airport/city 👇***\n"
-                    selected_info += f"\n"
-                    selected_info += f"Flight IATA code: {news['flight']['iata']}\n"
-                    selected_info += f"Departure Airport: {news['departure']['airport']}\n"
-                    selected_info += f"Original departure Time: {news['departure']['actual']}\n"
-                    selected_info += f"Estimated Arrival Time: {news['arrival']['estimated']}\n"
-                    selected_info += f"Arrival Gate: {news['arrival']['gate']}\n"
-                    selected_info += f"Departure Gate: {news['departure']['gate']}\n"
-                    selected_info += f"flight_status: {news['flight_status']}\n"
-                    selected_info += "\n"
-                    selected_info += "=====================================\n"
-            elif selected_option == '4':
-                if news['flight']['iata'] == user_input:
-                    selected_info += f"***Here are your required information about this flight 📅***\n"
-                    selected_info += f"\n"
-                    selected_info += f"Flight IATA code: {news['flight']['iata']}\n"
-                    selected_info += f"Departure Airport: {news['departure']['airport']}\n"
-                    selected_info += f"Departure Gate: {news['departure']['gate']}\n"
-                    selected_info += f"Departure terminal: {news['departure']['terminal']}\n"
-                    selected_info += f"Arrival airport: {news['arrival']['airport']}\n"
-                    selected_info += f"Arrival Gate: {news['arrival']['gate']}\n"
-                    selected_info += f"Arrival terminal: {news['arrival']['terminal']}\n"
-                    selected_info += f"flight_status: {news['flight_status']}\n"
-                    selected_info += f"scheduled Departure time: {news['departure']['scheduled']}\n"
-                    selected_info += f"scheduled arrival time: {news['arrival']['scheduled']}\n"
-                    selected_info += "=====================================\n"
-    except FileNotFoundError:
-        selected_info = "Error: File not found."
-    except json.JSONDecodeError:
-        selected_info = "Error: Unable to decode JSON file."
-    except Exception as e:
-        selected_info = f"An unexpected error occurred: {str(e)}"
-        
-    return selected_info
-
 
 def handle_client(conn,adrr):
     '''a function to handle the client request'''
@@ -164,15 +94,16 @@ def handle_client(conn,adrr):
             response = requests.get(url=url,params=prams)
             print(response.url)
             if response.status_code == 200:
+                nameoffile=client_name+' '+torequest+' '+recdata+' '+'A19.json'
+                nameoffile=re.sub("\s+", "_",nameoffile)
                 data = response.json()
-                with open('aa.json', "w") as file:
+                with open(nameoffile, "w") as file:
                      json.dump(data, file, indent=4)
-                     print("[SUCCESS] Data saved to 'posts.json'")
+                     print("[SUCCESS] Data saved to",nameoffile)
                 article_details = []
+                breiflist = []
                 if url==haedline:
-                # iterate over the articles and print their details
-                   
-
+                # iterate over the articles and save their details 
                     for article in data.get("articles", []):
                         
                             source_name = article.get("source", {}).get("name", "No source name available")
@@ -184,33 +115,26 @@ def handle_client(conn,adrr):
                             tobject =datetime.strptime(publication_date, "%Y-%m-%dT%H:%M:%SZ")
                             formatted_date =tobject.strftime("%b %d %Y, %I:%M %p")
                             # Convert the date and time to a more readable format
-                            print(formatted_date)
                             article_details.append({"source_name": source_name, "title": title, "author": author,'url': url, "description": description, "published At":formatted_date })
-                            breiflist=[{"title": article_details["title"], "author": a["author"], "published-day": a["published-day"], "published-time": a["published-time"]}for a in article]
-                            results=json.dumps(breiflist)
-                            conn.sendall(results.encode())
-                    else:
-                        print("[ERROR] No article data found")
-                        conn.sendall(b'No articles found')
+                            breiflist=[{"title": a["title"], "author": a["author"], "published-At": a["published At"]}for a in article_details]
+                   
                 elif url==sources:
-                     for article in data.get("articles", []):
-                        source_name = article.get("source", {}).get("name", "No source name available")
-                        title = article.get("title", "No title available")
-                        author = article.get("author", "No author available")
-
-                        article_details.append({"source_name": source_name, "title": title, "author": author })
-
-               
-                nameoffile=client_name+' '+torequest+' '+recdata+' '+'A19'
-                nameoffile=re.sub("\s+", "_",nameoffile)
-                
-               
+                     for article in data.get("sources", []) and  range(15):
+                        source_name = article.get("name", "No source name available")
+                        country = article.get("country", "No title available")
+                        Url=article.get("url", "No url available")
+                        description = article.get("description", "No description available")
+                        category = article.get("category", "No category available")
+                        language = article.get("language", "No language available")
+                        article_details.append({"source_name": source_name, "country": country, "description": description, "url": Url, "category": category, "language": language })
+                        breiflist.append({"source_name": source_name, "country": country, "description": description, "url": Url, "category": category, "language": language})
             else:
                 print("[ERROR] Status Code:",response.status_code)
             
-
-
-            
+             
+            results=json.dumps(breiflist)
+            conn.sendall(results.encode()) #send article details to client
+                    
     except Exception as e:
         #if there was any error during the procces
         print("connection closed")

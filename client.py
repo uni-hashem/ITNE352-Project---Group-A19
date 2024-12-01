@@ -17,8 +17,8 @@ try:
         print("2 - List of sources")
         print("3 - Quit")
         x=int(input("choise your option "))
-        while True:
-            if x==1:
+        if x==1:
+            while True:
                 print('1 - search for kewyords ')
                 print('2 - search by catagory ')
                 print('3 - search for country ')
@@ -44,11 +44,10 @@ try:
                         print("Invalid option. Please choose a valid option.")
                 recived=client_socket.recv(4000)
                 results=json.loads(recived.decode('utf-8'))
-                for i in results:
-                    print(i)
-        while True:                
-            if x==2:
+                print(results)
 
+        if x==2:
+            while True:                
                     print('1 - list all sources by category ')
                     print('2 - list all sources by country ')
                     print('3 - list all sources by languege ')
@@ -70,6 +69,9 @@ try:
                         break
                     else:
                         print("Invalid option. Please choose a valid option.")
+                    recived=client_socket.recv(4000)
+                    results=json.loads(recived.decode('utf-8'))
+                    print(results)
 
 except ConnectionRefusedError:
     print("Connection to the server failed.")
