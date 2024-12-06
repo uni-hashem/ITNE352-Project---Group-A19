@@ -40,7 +40,8 @@ def handle_client(conn,adrr):
                 if url==haedline:
                     thread_data.client_data={}
                     torequest=''
-                    recdata=''
+                    recdata='' bhb
+
 
                 url=sources
 
