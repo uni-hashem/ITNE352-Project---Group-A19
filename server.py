@@ -3,7 +3,6 @@ import requests
 import json
 import socket
 import threading
-import re
 
 #to seperate the users data to make every user has his own
 thread_data=threading.local()
