@@ -18,7 +18,7 @@ try:
         print("3 - Quit")
         x=int(input("choise your option "))
         if x==1:
-            while True:
+            
                 print('1 - search for kewyords ')
                 print('2 - search by catagory ')
                 print('3 - search for country ')
@@ -38,16 +38,11 @@ try:
                     client_socket.sendall((country+'h3').encode())
                 elif y==4:
                     client_socket.sendall('h4'.encode())
-                elif y==5:
-                    break
-                else:
-                        print("Invalid option. Please choose a valid option.")
-                recived=client_socket.recv(4000)
-                results=json.loads(recived.decode('utf-8'))
-                print(results)
+                elif y!=5:
+                     print("Invalid option. Please choose a valid option.") 
 
         if x==2:
-            while True:                
+                         
                     print('1 - list all sources by category ')
                     print('2 - list all sources by country ')
                     print('3 - list all sources by languege ')
@@ -65,15 +60,26 @@ try:
                         client_socket.sendall((language+'s3').encode())
                     elif y==4:
                         client_socket.sendall('s4'.encode())
-                    elif y==5:
-                        break
-                    else:
-                        print("Invalid option. Please choose a valid option.")
-                    recived=client_socket.recv(4000)
-                    results=json.loads(recived.decode('utf-8'))
-                    print(results)
-
-except ConnectionRefusedError:
-    print("Connection to the server failed.")
+                    elif y!=5:
+                        print("Invalid option. Please choose a valid option.") 
+        if x==3:
+             client_socket.close()
+             break
+        
+        recived=client_socket.recv(4000)
+        results=json.loads(recived.decode('utf-8'))
+        c=1
+        for headline in results:
+            print('\n',c,':')
+            print(json.dumps(headline,indent=4))
+            if c==15:
+                break
+            c+=1
+        print('Enter the number of record you want to view: ')
+        choice=input()
+        client_socket.sendall(choice.encode())
+        recived=client_socket.recv(4000)
+        results=json.loads(recived.decode('utf-8'))
+        print(json.dumps(results,indent=4))
 finally:
     client_socket.close()
