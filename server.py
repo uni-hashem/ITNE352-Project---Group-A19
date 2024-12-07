@@ -16,11 +16,11 @@ def requested_data(data,type,torequest,recdata):
     if torequest=='':
         torequest=type
     else:
-        torequest+=' , '+type
+        torequest+=','+type
     if recdata=='':
         recdata=data
     else:
-        recdata+=' , '+data
+        recdata+=','+data
 
     return [recdata,torequest]
     
@@ -30,14 +30,14 @@ def handle_client(conn,adrr):
     thread_data.client_data={} #dict for every client
     url=''
     torequest=''
-    recdata=''
-    tp=''
+    recdata='' #requested data 
+    tp='' #type of requested data
     try:
         while True:
             data = conn.recv(1024)
             # to determine wither its headline request or sources
             if data[-2]==115: # the number is for s in ascii table
-                if url==haedline:
+                if url in haedline:
                     thread_data.client_data={}
                     torequest=''
                     recdata=''
@@ -46,7 +46,7 @@ def handle_client(conn,adrr):
                 url=sources
 
             elif data[-2]==104: # the number is for h in ascii table
-                if url==sources:
+                if url in sources:
                     thread_data.client_data={}  
                     torequest=''
                     recdata=''
@@ -113,14 +113,11 @@ def handle_client(conn,adrr):
                             publication_date = article.get("publishedAt", "No publication date available")
                             description = article.get("description", "No description available")
                             url = article.get("url", "No url available")
-                            tobject =datetime.strptime(publication_date, "%Y-%m-%dT%H:%M:%SZ")
-                            formatted_date =tobject.strftime("%b %d %Y, %I:%M %p")
-                            # Convert the date and time to a more readable format
-                            article_details.append({"source_name": source_name, "title": title, "author": author,'url': url, "description": description, "published At":formatted_date })
-                            breiflist=[{"title": a["title"], "author": a["author"], "published-At": a["published At"]}for a in article_details]
+                            article_details.append({"source_name": source_name, "title": title, "author": author,'url': url, "description": description, "published At":publication_date })
+                            breiflist=[{"title": a["title"], "author": a["author"], "source_name": a["source_name"]}for a in article_details]
                    
                 elif url==sources:
-                     for article in data.get("sources", []) and  range(15):
+                     for article in data.get("sources", []):
                         source_name = article.get("name", "No source name available")
                         country = article.get("country", "No title available")
                         Url=article.get("url", "No url available")
@@ -128,13 +125,16 @@ def handle_client(conn,adrr):
                         category = article.get("category", "No category available")
                         language = article.get("language", "No language available")
                         article_details.append({"source_name": source_name, "country": country, "description": description, "url": Url, "category": category, "language": language })
-                        breiflist.append({"source_name": source_name, "country": country, "description": description, "url": Url, "category": category, "language": language})
+                        breiflist.append({"source_name": source_name})
             else:
                 print("[ERROR] Status Code:",response.status_code)
             
              
             results=json.dumps(breiflist)
             conn.sendall(results.encode()) #send article details to client
+            choise=conn.recv(1024).decode() #receive user's next choise
+            conn.sendall(json.dumps(article_details[int(choise)-1]).encode()) #send article details to client) 
+
                     
     except Exception as e:
         #if there was any error during the procces
