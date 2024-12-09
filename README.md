@@ -129,7 +129,7 @@ ___
 
 3- Object-Oriented Programming:
 
-4- Interrupt: There is a function defined in the client side of the code that interrupts the signal and close the terminal whenever the user tries to copy something written within the terminal using Ctrl+c  
+4- Interrupt: There is a function defined in the client side of the code that interrupts the signal and closes the terminal whenever the user tries to copy something written within the terminal using Ctrl+c. The server disconnects with the client and client side of the terminal prints a message "Caught interrupt signal. Closing connection".
 ___
 ## Acknowledgments
 
