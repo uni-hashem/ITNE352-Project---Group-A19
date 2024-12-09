@@ -127,9 +127,7 @@ ___
 
 2- Multithreading: The server script uses the threading module to handle several client connections at once. The server may handle requests from several clients simultaneously thanks to this multithreading technique. By giving every client connection its own thread. Using multithreading. the server increases it's efficiency in sending the requested data to clients 
 
-3- Object-Oriented Programming:
-
-4- Interrupt: There is a function defined in the client side of the code that interrupts the signal and closes the terminal whenever the user tries to copy something written within the terminal using Ctrl+c. The server disconnects with the client and client side of the terminal prints a message "Caught interrupt signal. Closing connection".
+3- Interrupt: There is a function defined in the client side of the code that interrupts the signal and closes the terminal whenever the user tries to copy something written within the terminal using Ctrl+c. The server disconnects with the client and client side of the terminal prints a message "Caught interrupt signal. Closing connection".
 ___
 ## Acknowledgments
 
@@ -140,5 +138,7 @@ ___
 * A big thanks to Dr. Mohammad A. Almeer for teaching us and guiding us on the project and throughtout the course as a whole.
 ___
 ## Conclusion
+
+By demonstrating effective network programming, the Multithreaded News Client/Server System makes it possible to retrieve news in real time using NewsAPI. The server manages several customers with ease by utilizing multithreading, guaranteeing quickness and dependability. Our knowledge of client-server architectures, API integration, and collaborative development has grown as a result of this project, giving us a solid basis for upcoming technological difficulties.
 
 ---
