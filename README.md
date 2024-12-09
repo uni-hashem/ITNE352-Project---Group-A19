@@ -96,16 +96,40 @@ results = json.loads(received.decode('utf-8'))
 ### Server side
 The packages utilized in the server script are:
 ```
-
+import requests
+import json
+import socket
+import threading
+```
+Define URLs for the fetched sources and headlines
+```
+headline = "https://newsapi.org/v2/top-headlines?apiKey=4411d3bdab63427c91fcef22bed1b3f0" 
+sources = 'https://newsapi.org/v2/top-headlines/sources?apiKey=4411d3bdab63427c91fcef22bed1b3f0'
+```
+The following scrpit is a function that handles the headline data and and return a brief list:
+```
+def handle_headline(data):
+```
+The following scrpit is a function that handles the source data and and return a brief list:
+```
+def handle_sources(data):
+```
+Defines a socket and starts a TCP connection 
+```
+server_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server_socket.bind(('localhost', 12345))
+server_socket.listen(5)
 ```
 ___
 ## Additional concepts
 
-1- Threading.local:
+1- Threading.local: Each and every thread is separated from the other thread and with their own parameters that the users can borrow whenever they want to make a request from the server side.
 
 2- Multithreading: The server script uses the threading module to handle several client connections at once. The server may handle requests from several clients simultaneously thanks to this multithreading technique. By giving every client connection its own thread. Using multithreading. the server increases it's efficiency in sending the requested data to clients 
 
 3- Object-Oriented Programming:
+
+4- Interrupt: There is a function defined in the client side of the code that interrupts the signal and close the terminal whenever the user tries to copy something written within the terminal using Ctrl+c  
 ___
 ## Acknowledgments
 
