@@ -1,12 +1,19 @@
-import socket,json
+import socket,json,signal,sys
+def handle_interrupt(signal, frame):
+    print("\nCaught interrupt signal. Closing connection.")
+    client_socket.close()
+    sys.exit(0)
+signal.signal(signal.SIGINT, handle_interrupt)
+
+
 # Define server host and port
 HOST = 'localhost'  # Server's hostname or IP address
 PORT = 12345        # Port used by the server
-
-# Create a client socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-clientname=input('Enter your name: ')
-if clientname == '':
+clientname=input('Enter Your Name: ')
+clientname=clientname.strip() # Remove the trailing and leading spaces from the name string
+# Check if the client name is empty
+if clientname=='':
      clientname = 'Unknown'
 try:
     # Connect to the server
@@ -19,7 +26,6 @@ try:
         print("3 - Quit")
         x=int(input("choise your option "))
         if x==1:
-            
                 print('1 - search for kewyords ')
                 print('2 - search by catagory ')
                 print('3 - search for country ')
@@ -72,24 +78,37 @@ try:
         if x==3:
              client_socket.sendall('quit'.encode())
              break
-        
+        elif x>3 or x<1: #force the client to chose valid option
+             print("Invalid option. Please choose a valid option.")
+             continue
         
         recived=client_socket.recv(4000)
         results=json.loads(recived.decode('utf-8'))
+        if results[0]=='There is no result for this article':
+             print('\n','='*50)
+             print(results[0])
+             print('='*50,'\n')
+             client_socket.sendall
+             continue
         c=1
         for headline in results:
             print('\n',c,':')
             print('='*40)
             print(json.dumps(headline,indent=4))
             print('='*40)
-            if c==15:
+            if c==len(results) or c==15:
                 break
             c+=1
         print('Enter the number of record you want to view: ')
-        choice=input()
-        client_socket.sendall(choice.encode())
+        choice=int(input())
+        while choice<=0 or choice>len(results):
+             print('Invalid option. Enter the number of record you want to view: ')
+             choice=int(input())
+        client_socket.sendall(str(choice).encode())
         recived=client_socket.recv(4000)
         results=json.loads(recived.decode('utf-8'))
         print(json.dumps(results,indent=4))
+except Exception as e:
+     print("connection closed")
 finally:
     client_socket.close()

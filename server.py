@@ -14,6 +14,12 @@ def handle_headline(data):
     '''Function to handle headline data and return a brief list and full list'''
     counter=1
     article_details=[]
+    breiflist=[]
+    # cheking if the there are headlines retrieved
+    if data.get("totalResults")==0:
+             breiflist.append("There is no result for this article")
+             article_details.append("There is no result for this article")
+
     for article in data.get("articles", []):
          counter+=1
          source_name = article.get("source", {}).get("name", "No source name available")
@@ -31,7 +37,6 @@ def handle_headline(data):
 def handle_requestes(url,filename,prams):
     '''Function to handle requests and save data to file. Returns brief and full list if requested'''
     response = requests.get(url=url,params=prams)
-    print(response.url)
     if response.status_code == 200:
         data = response.json()
         with open(filename, "w") as file:
@@ -51,7 +56,16 @@ def handle_sources(data):
     counter=1
     sources_list=[]
     breiflist=[]
+    # cheking if the there are sources retrieved
+    if data.get("totalResults")==0:
+             breiflist.append("There is no result for this article")
+             sources_list.append("There is no result for this article")
+
     for article in data.get("sources", []):
+         if article.get("totalResults",False):
+             breiflist.append("There is no result for this article")
+             sources_list.append("There is no result for this article")
+             break
          counter+=1
          source_name = article.get("name", "No source name available")
          country = article.get("country", "No title available")
@@ -111,6 +125,7 @@ def handle_client(conn,adrr):
         while True:
             data = conn.recv(1024)
             if not data:
+                print(client_name,'disconnected with address',addr)
                 break
             if data.decode()=='quit':
                 print(client_name,'disconnected with address',addr)
@@ -128,14 +143,19 @@ def handle_client(conn,adrr):
                 filename=client_name+'-'+reqby+'-'+tp+'-'+'A19.json'
             breiflist,article_details=handle_requestes(url=url,filename=filename,prams=prams) #request data from newsapi.org 
             results=json.dumps(breiflist)
+            if breiflist[0]=='There is no result for this article':
+                conn.sendall(results.encode()) #send a massege to client that there is no result and continue
+                continue
+           
             conn.sendall(results.encode()) #send article details to client
             choise=conn.recv(1024).decode() #receive user's next choise
             conn.sendall(json.dumps(article_details[int(choise)-1]).encode()) #send article details to client) 
-
+    except ConnectionResetError:
+        print(client_name,'disconnected with address',addr)
                     
     except Exception as e:
         #if there was any error during the procces
-        print("connection closed")
+        print(client_name,'disconnected with address',addr)
         print(e)
         
 
