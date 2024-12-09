@@ -1,5 +1,6 @@
 import socket,json,signal,sys
 def handle_interrupt(signal, frame):
+    '''to handle an interrupt signal from the user'''
     print("\nCaught interrupt signal. Closing connection.")
     client_socket.close()
     sys.exit(0)

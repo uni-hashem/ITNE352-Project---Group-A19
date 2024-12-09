@@ -150,13 +150,10 @@ def handle_client(conn,adrr):
             conn.sendall(results.encode()) #send article details to client
             choise=conn.recv(1024).decode() #receive user's next choise
             conn.sendall(json.dumps(article_details[int(choise)-1]).encode()) #send article details to client) 
-    except ConnectionResetError:
-        print(client_name,'disconnected with address',addr)
                     
     except Exception as e:
-        #if there was any error during the procces
+        #if there was any error during the procces or the client disconnected unexpectedly
         print(client_name,'disconnected with address',addr)
-        print(e)
         
 
 
