@@ -39,9 +39,9 @@ ___
 1- Install the latest verion of Python from Python's official website, which is: https://www.python.org/downloads/
 
 2- Install the required packages to run the project by running the following command in command prompt:
-
+```
 pip install requests 
-
+```
 3- Clone the repository from GitHub and run it on Virtual Studio code  
 ___
 ## How to
@@ -51,18 +51,54 @@ ___
 2- Navigate to the directory where the client and sierver files are in terminal
 
 3- Start the server side first to make it ready to receive requests by running the script:
-
+```
 python server.py 
-
+```
 4- Start the client side next and connect to the already running server using the script:
-
+```
 python client.py
-
+```
 5- The client side of the terminal window would ask you to input some information and choose from the menu, interact with it and retrieve the data.
 ___
 ## The Scripts
 
----
+### Client side 
+The packages utilized in the client script are:
+```
+import socket
+import json
+import signal
+import sys
+```
+Create a socket for the client and ask to input the client's name
+```
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clientname = input('Enter Your Name: ')
+```
+Connect to the server after creating the socket
+```
+client_socket.connect((HOST, PORT))
+client_socket.sendall(clientname.encode())
+print("Connected to the server.")
+```
+The main menu that the user has to select from to get to the information wanted
+```
+print("1 - search by headlines")
+print("2 - List of sources")
+print("3 - Quit")
+x = int(input("Choose your option "))
+```
+Displays the received list of results and details for a specified result that the user chooses
+```
+received = client_socket.recv(4000)
+results = json.loads(received.decode('utf-8'))
+```
+### Server side
+The packages utilized in the server script are:
+```
+
+```
+___
 ## Additional concepts
 
 1- Threading.local:
