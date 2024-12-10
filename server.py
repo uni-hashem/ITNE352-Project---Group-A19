@@ -57,7 +57,7 @@ def handle_sources(data):
     sources_list=[]
     breiflist=[]
     # cheking if the there are sources retrieved
-    if data.get("totalResults")==0:
+    if data.get('sources')==[]:
              breiflist.append("There is no result for this article")
              sources_list.append("There is no result for this article")
 
@@ -93,17 +93,16 @@ def handle_params(data):
     '''distinguish between the choise of client'''
     if data[-2:]==b'h1':
         thread_data.client_data['q']=data[:-2].decode()
-        tp='keywords'
-        
+        tp='keywords'+f'({data[:-2].decode()})'
     elif data[-2:]==b'h2' or data[-2:]==b's1':
         thread_data.client_data['category']=data[:-2].decode()
-        tp='category'
+        tp='category'+f'({data[:-2].decode()})'
     elif data[-2:]==b'h3'or data[-2:]==b's2':
         thread_data.client_data['country']=data[:-2].decode()
-        tp='country'
+        tp='country'+f'({data[:-2].decode()})'
     elif data[-2:]==b's3':
         thread_data.client_data['language']=data[:-2].decode()
-        tp='language'
+        tp='language'+f'({data[:-2].decode()})'
     elif data[-2:]==b'h4':
          thread_data.client_data['country']='us'
             
@@ -149,11 +148,13 @@ def handle_client(conn,adrr):
            
             conn.sendall(results.encode()) #send article details to client
             choise=conn.recv(1024).decode() #receive user's next choise
+            print(client_name,'requested choise: ',choise)
             conn.sendall(json.dumps(article_details[int(choise)-1]).encode()) #send article details to client) 
                     
     except Exception as e:
         #if there was any error during the procces or the client disconnected unexpectedly
         print(client_name,'disconnected with address',addr)
+        print(e)
         
 
 

@@ -38,10 +38,12 @@ try:
                     keyword = input("Enter your keyword: ")
                     client_socket.sendall((keyword+'h1').encode())
                 elif y==2:
+                    print('Available categories are: business, general, health, science, sports, technology')
                     category = input("Enter your category: ")
                     client_socket.sendall((category+'h2').encode())
                 elif y==3:
                     country = input("Enter your country: ")
+                    print('Available countries are: au, ca, jp, ae, sa, kr, us, ma')
                     client_socket.sendall((country+'h3').encode())
                 elif y==4:
                     client_socket.sendall('h4'.encode())
@@ -108,7 +110,9 @@ try:
         client_socket.sendall(str(choice).encode())
         recived=client_socket.recv(4000)
         results=json.loads(recived.decode('utf-8'))
+        print('\n','='*50)
         print(json.dumps(results,indent=4))
+        print('='*50,'\n')
 except Exception as e:
      print("connection closed")
 finally:
