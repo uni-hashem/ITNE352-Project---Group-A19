@@ -7,8 +7,8 @@ import threading
 #to seperate the users data to make every user has his own
 thread_data=threading.local()
 #urls one for headlines and another for sources
-haedline = "https://newsapi.org/v2/top-headlines?apiKey=4411d3bdab63427c91fcef22bed1b3f0"
-sources='https://newsapi.org/v2/top-headlines/sources?apiKey=4411d3bdab63427c91fcef22bed1b3f0'
+HEADLINE = "https://newsapi.org/v2/top-headlines?apiKey=4411d3bdab63427c91fcef22bed1b3f0"
+SOURCES='https://newsapi.org/v2/top-headlines/sources?apiKey=4411d3bdab63427c91fcef22bed1b3f0'
 
 def handle_headline(data):
     '''Function to handle headline data and return a brief list and full list'''
@@ -42,10 +42,10 @@ def handle_requestes(url,filename,prams):
         with open(filename, "w") as file:
              json.dump(data, file, indent=4)
              print("[SUCCESS] Data saved to",filename)
-        if url==haedline:
+        if url==HEADLINE:
             breiflist,article_details = handle_headline(data)
 
-        elif url==sources:
+        elif url==SOURCES:
             breiflist,article_details = handle_sources(data)
     else:
         print("[ERROR] Status Code:",response.status_code)
@@ -84,10 +84,10 @@ def handle_params(data):
     thread_data.client_data={} #dict for every client
     tp='' #type of requested data
     if data[-2]==115:
-        url=sources
+        url=SOURCES
         reqby='sources'
     else:
-        url=haedline
+        url=HEADLINE
         reqby='haedline'
     
     '''distinguish between the choise of client'''
