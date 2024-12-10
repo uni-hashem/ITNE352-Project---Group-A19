@@ -42,8 +42,8 @@ try:
                     category = input("Enter your category: ")
                     client_socket.sendall((category+'h2').encode())
                 elif y==3:
-                    country = input("Enter your country: ")
                     print('Available countries are: au, ca, jp, ae, sa, kr, us, ma')
+                    country = input("Enter your country: ")
                     client_socket.sendall((country+'h3').encode())
                 elif y==4:
                     client_socket.sendall('h4'.encode())
