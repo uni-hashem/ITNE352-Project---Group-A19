@@ -6,9 +6,13 @@ import threading
 
 #to seperate the users data to make every user has his own
 thread_data=threading.local()
+lock = threading.Lock()
+# Dictionary to store active user names
+user_connections = {}
 #urls one for headlines and another for sources
 HEADLINE = "https://newsapi.org/v2/top-headlines?apiKey=4411d3bdab63427c91fcef22bed1b3f0"
 SOURCES='https://newsapi.org/v2/top-headlines/sources?apiKey=4411d3bdab63427c91fcef22bed1b3f0'
+
 
 def handle_headline(data):
     '''Function to handle headline data and return a brief list and full list'''
@@ -62,10 +66,6 @@ def handle_sources(data):
              sources_list.append("There is no result for this article")
 
     for article in data.get("sources", []):
-         if article.get("totalResults",False):
-             breiflist.append("There is no result for this article")
-             sources_list.append("There is no result for this article")
-             break
          counter+=1
          source_name = article.get("name", "No source name available")
          country = article.get("country", "No title available")
@@ -83,7 +83,7 @@ def handle_params(data):
     '''Function to handle parameters and type of requested data'''
     thread_data.client_data={} #dict for every client
     tp='' #type of requested data
-    if data[-2]==115:
+    if data[-2]==115: 
         url=SOURCES
         reqby='sources'
     else:
@@ -118,42 +118,49 @@ def handle_params(data):
         prams['language']=thread_data.client_data['language']
     return prams,url,tp,reqby
 
-def handle_client(conn,adrr):
-    '''a function to handle the client request'''
+def handle_client(conn, addr, client_name):
+    """Handles client requests."""
     try:
         while True:
             data = conn.recv(1024)
             if not data:
-                print(client_name,'disconnected with address',addr)
-                break
-            if data.decode()=='quit':
-                print(client_name,'disconnected with address',addr)
+                with lock:
+                    if client_name in user_connections:
+                        del user_connections[client_name]
+                print(f"{client_name} disconnected with address {addr}")
                 conn.close()
-                quit()
+                break
+            if data.decode() == 'quit':
+                with lock:
+                    if client_name in user_connections:
+                        del user_connections[client_name]
+                print(f"{client_name} disconnected with address {addr}")
+                conn.close()
+                return
 
-            prams,url,tp,reqby=handle_params(data)
+            prams, url, tp, reqby = handle_params(data)
 
-            if prams=={}: #that means client chose all sources
-                print(client_name,"requested all sources")
-                filename=client_name+'-'+'all-sources'+'-'+'A19.json'
-                
-            else:    
-                print(client_name,'request by',reqby,'with',tp)
-                filename=client_name+'-'+reqby+'-'+tp+'-'+'A19.json'
-            breiflist,article_details=handle_requestes(url=url,filename=filename,prams=prams) #request data from newsapi.org 
-            results=json.dumps(breiflist)
-            if breiflist[0]=='There is no result for this article':
-                conn.sendall(results.encode()) #send a massege to client that there is no result and continue
+            if prams == {}:  # This means client chose all sources
+                print(f"{client_name} requested all sources")
+                filename = f"{client_name}-all-sources-A19.json"
+            else:
+                print(f"{client_name} requested by {reqby} with {tp}")
+                filename = f"{client_name}-{reqby}-{tp}-A19.json"
+            breiflist, article_details = handle_requestes(url=url, filename=filename, prams=prams)  # Request data from newsapi.org 
+            results = json.dumps(breiflist)
+            if breiflist[0] == 'There is no result for this article':
+                conn.sendall(results.encode())  # Send a message to client that there is no result and continue
                 continue
-           
-            conn.sendall(results.encode()) #send article details to client
-            choise=conn.recv(1024).decode() #receive user's next choise
-            print(client_name,'requested choise: ',choise)
-            conn.sendall(json.dumps(article_details[int(choise)-1]).encode()) #send article details to client) 
-                    
+
+            conn.sendall(results.encode())  # Send article details to client
+            choice = conn.recv(1024).decode()  # Receive user's next choice
+            print(f"{client_name} requested choice: {choice}")
+            conn.sendall(json.dumps(article_details[int(choice)-1]).encode())  # Send article details to client
     except Exception as e:
-        #if there was any error during the procces or the client disconnected unexpectedly
-        print(client_name,'disconnected with address',addr)
+        with lock:
+            if client_name in user_connections:
+                del user_connections[client_name]
+        print(f"{client_name} disconnected with address {addr}")
         print(e)
         
 
@@ -166,8 +173,9 @@ print("the server is listening on localhost port 12345")
 
 #accept connection from clients ans start thread
 while True:
-    conn,addr=server_socket.accept()
-    client_name=conn.recv(100).decode()
-    print(client_name,'has connected with address',addr)
-    thread=threading.Thread(target=handle_client,args=(conn,addr))
-    thread.start()
+     conn,addr=server_socket.accept()
+     client_name=conn.recv(100).decode()
+     user_connections[client_name]=conn
+     print(client_name,'has connected with address',addr)
+     thread=threading.Thread(target=handle_client,args=(conn,addr,client_name))
+     thread.start()
